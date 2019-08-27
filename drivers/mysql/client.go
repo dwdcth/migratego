@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/saturn4er/barkup"
-	"github.com/saturn4er/migratego"
+	"github.com/dwdcth/migratego"
 	"github.com/fatih/color"
 	"regexp"
 )

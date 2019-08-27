@@ -3,7 +3,7 @@ package mysql
 import (
 	"strings"
 
-	"github.com/saturn4er/migratego"
+	"github.com/dwdcth/migratego"
 )
 
 type dropTablesGenerator struct {

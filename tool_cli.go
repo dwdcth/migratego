@@ -9,6 +9,9 @@ import (
 	"github.com/urfave/cli"
 )
 
+
+//todo dump all  xorm dumpTables
+
 func RunToolCli(m *migrateApplication, args []string) error {
 	tool := cli.NewApp()
 	tool.HelpName = "migratego"

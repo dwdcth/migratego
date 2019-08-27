@@ -3,13 +3,13 @@ package migratego
 type QueryBuilder interface {
 	DropTables(...string) DropTablesGenerator
 	CreateTable(string, func(CreateTableGenerator)) CreateTableGenerator
-	Table(string, func(generator TableScope))
+	AlterTable(string, func(generator AlterTableGenerator))
 	NewIndexColumn(column string, params ...interface{}) IndexColumnGenerator
 	RawQuery(string)
 	Sqls() []string
 }
 
-type Order string
+type Order string //todo  asc desc
 type Querier interface {
 	Sql() string
 }
@@ -19,47 +19,44 @@ type DropTablesGenerator interface {
 	Sql() string
 }
 type CreateTableGenerator interface {
-	Column(name string, Type string) CreateTableColumnGenerator
+	Column(name string, Type string) TableColumnGenerator
 	Index(name string, unique bool) IndexGenerator
 	Engine(engine string) CreateTableGenerator
 	Charset(charset string) CreateTableGenerator
 	Comment(comment string) CreateTableGenerator
 	Sql() string
 }
-type CreateTableColumnGenerator interface {
+type TableColumnGenerator interface {
 	GetName() string
-	Primary(comment ...string) CreateTableColumnGenerator
-	NotNull() CreateTableColumnGenerator
-	Unsigned() CreateTableColumnGenerator
-	Binary() CreateTableColumnGenerator
-	ZeroFill() CreateTableColumnGenerator
-	Generated() CreateTableColumnGenerator
-	DefaultValue(v string) CreateTableColumnGenerator
-	Comment(c string) CreateTableColumnGenerator
-	AutoIncrement(primaryComment ...string) CreateTableColumnGenerator
+	Primary(comment ...string) TableColumnGenerator
+	NotNull() TableColumnGenerator
+	Unsigned() TableColumnGenerator
+	Binary() TableColumnGenerator
+	ZeroFill() TableColumnGenerator
+	Generated() TableColumnGenerator
+	DefaultValue(v string) TableColumnGenerator
+	Charset(charset string) TableColumnGenerator //todo charset
+	Comment(c string) TableColumnGenerator
+	AutoIncrement(primaryComment ...string) TableColumnGenerator
 	Index(name string, unique bool, params ...interface{}) IndexGenerator
+	After(column string) TableColumnGenerator                                                 // todo after
+	Rename(oldName string, newName string, charset string, collate string,notNull bool) TableColumnGenerator // todo after
 	Sql() string
 }
-type UpdateTableGenerator interface {
-	Rename(name string)
+type AlterTableGenerator interface {
+	Rename(name string) AlterTableGenerator
 	Delete(name string)
-	AddColumn(name string, Type string) UpdateTableAddColumnGenerator
+	AddColumn(name string, Type string) TableColumnGenerator
+	RemoveColumn(name string)
 	AddIndex(name string, unique bool) IndexGenerator
 	RemoveIndex(name string)
+	Charset(charset string) AlterTableGenerator // todo charset
+	Comment(c string) AlterTableGenerator
+	ModifyColumn(name string, Type string, notNull bool) TableColumnGenerator
+	RenameColumn(oldName string, newName string, charset string,collate string, notNull bool) TableColumnGenerator
 	Sql() string
 }
-type UpdateTableAddColumnGenerator interface {
-	GetName() string
-	NotNull() UpdateTableAddColumnGenerator
-	Unsigned() UpdateTableAddColumnGenerator
-	Binary() UpdateTableAddColumnGenerator
-	ZeroFill() UpdateTableAddColumnGenerator
-	Generated() UpdateTableAddColumnGenerator
-	DefaultValue(v string) UpdateTableAddColumnGenerator
-	Comment(c string) UpdateTableAddColumnGenerator
-	After(column string) UpdateTableAddColumnGenerator
-	Sql() string
-}
+
 type IndexGenerator interface {
 	Unique() IndexGenerator
 	Columns(...IndexColumnGenerator) IndexGenerator
@@ -69,14 +66,6 @@ type IndexColumnGenerator interface {
 	Sql() string
 }
 
-type TableScope interface {
-	AddColumn(name, cType string) UpdateTableAddColumnGenerator
-	RemoveColumn(name string) TableScope
-	AddIndex(string, bool) IndexGenerator
-	RemoveIndex(name string) TableScope
-	Rename(name string) TableScope
-	Delete()
-}
 type DBClient interface {
 	// PrepareTransactionsTable checks if table with migrations exists and creates it, if it doesn't
 	PrepareTransactionsTable() error
@@ -90,4 +79,6 @@ type DBClient interface {
 	ApplyMigration(migration *Migration, down bool) error
 	// GetAppliedMigrations returns list of migrations in migrations table
 	GetAppliedMigrations() ([]Migration, error)
+	//有错误是否继续
+	SetContinueErr(flag bool)
 }

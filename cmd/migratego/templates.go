@@ -5,8 +5,8 @@ const mainFileTpl = `package main
 import (
 	"os"
 
-	"github.com/saturn4er/migratego"
-	_ "github.com/saturn4er/migratego/drivers/{{.driver}}"
+	"github.com/dwdcth/migratego"
+	_ "github.com/dwdcth/migratego/drivers/{{.driver}}"
 )
 
 var app = migratego.NewApp("{{.driver}}", "{{.dsn}}")
@@ -21,7 +21,7 @@ func main() {
 const migrationFileTemplate = `package main
 
 import (
-	"github.com/saturn4er/migratego"
+	"github.com/dwdcth/migratego"
 	{{ range $e := .imports }}
 	"{{$e}}"
 	{{ end }}

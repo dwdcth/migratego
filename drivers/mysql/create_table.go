@@ -3,7 +3,7 @@ package mysql
 import (
 	"strings"
 
-	"github.com/saturn4er/migratego"
+	"github.com/dwdcth/migratego"
 )
 
 type IndexType string
@@ -15,7 +15,7 @@ type createTableGenerator struct {
 	engine        string
 	comment       string
 	charset       string
-	columns       []migratego.CreateTableColumnGenerator
+	columns       []migratego.TableColumnGenerator
 	indexes       []migratego.IndexGenerator
 	primaryKey    *PrimaryKeyGenerator
 	uniqueIndexes map[string]string
@@ -64,8 +64,8 @@ func (c *createTableGenerator) Engine(engine string) migratego.CreateTableGenera
 	c.engine = engine
 	return c
 }
-func (c *createTableGenerator) Column(name string, Type string) migratego.CreateTableColumnGenerator {
-	result := &CreateTableColumn{
+func (c *createTableGenerator) Column(name string, Type string) migratego.TableColumnGenerator {
+	result := &TableColumn{
 		table: c,
 		name:  name,
 		fType: Type,

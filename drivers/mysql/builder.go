@@ -1,6 +1,6 @@
 package mysql
 
-import "github.com/saturn4er/migratego"
+import "github.com/dwdcth/migratego"
 
 type MysqlQueryBuilder struct {
 	generators []migratego.Querier
@@ -45,8 +45,8 @@ func (c *MysqlQueryBuilder) NewIndexColumn(column string, params ...interface{})
 		Length: length,
 	}
 }
-func (m *MysqlQueryBuilder) Table(name string, b func(t migratego.TableScope)) {
-	scope := &TableScope{name: name, builder: m}
+func (m *MysqlQueryBuilder) AlterTable(name string, b func(t migratego.AlterTableGenerator)) {
+	scope := &AlterTableGenerator{name: name, builder: m}
 	b(scope)
 }
 func (m *MysqlQueryBuilder) Sqls() []string {

@@ -81,7 +81,7 @@ func generateMigration(version int, name string, dir string, args []string) erro
 	upBody, upImports := GetUpMigrationBodyByName(name)
 	downBody, downImports := GetDownMigrationBodyByName(name)
 	usedImports := make(map[string]bool)
-	usedImports["github.com/saturn4er/migratego"] = true
+	usedImports["github.com/dwdcth/migratego"] = true
 	var imports []string
 	for _, i := range upImports {
 		if !usedImports[i] {

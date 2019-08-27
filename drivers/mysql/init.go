@@ -1,6 +1,6 @@
 package mysql
 
-import "github.com/saturn4er/migratego"
+import "github.com/dwdcth/migratego"
 
 func init() {
 	migratego.DefineDriver("mysql", QueryBuilderConstructor, NewClient)

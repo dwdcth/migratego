@@ -31,7 +31,7 @@ func init() {
 			},
 			cli.StringFlag{
 				Name:  "table,t",
-				Usage: "Table name, where migratego will store all info",
+				Usage: "AlterTable name, where migratego will store all info",
 				Value: "",
 			},
 			cli.StringFlag{

@@ -3,7 +3,7 @@ package mysql
 import (
 	"testing"
 
-	"github.com/saturn4er/migratego"
+	"github.com/dwdcth/migratego"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

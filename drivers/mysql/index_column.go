@@ -3,7 +3,7 @@ package mysql
 import (
 	"strconv"
 
-	"github.com/saturn4er/migratego"
+	"github.com/dwdcth/migratego"
 )
 
 type IndexColumnGenerator struct {
