@@ -13,6 +13,7 @@ require (
 	github.com/saturn4er/barkup v0.0.0-20170219194318-60a71b6bd589
 	github.com/smartystreets/assertions v1.0.1
 	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
+	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/thoas/go-funk v0.4.0
 	github.com/urfave/cli v1.21.0
