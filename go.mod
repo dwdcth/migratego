@@ -1,4 +1,4 @@
-module saturn4er/migratego
+module github.com/dwdcth/migratego
 
 go 1.12
 
