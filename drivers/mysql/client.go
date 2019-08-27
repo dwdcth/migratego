@@ -12,14 +12,17 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/saturn4er/barkup"
 	"github.com/saturn4er/migratego"
+	"github.com/fatih/color"
+	"regexp"
 )
 
 type MysqlClient struct {
-	tableName string
-	DB        *sqlx.DB
-	dsn       string
+	tableName   string
+	DB          *sqlx.DB
+	dsn         string
+	ContinueErr bool
 }
-
+//这里可能要注释掉 return "", nil
 func (c *MysqlClient) Backup(path string) (string, error) {
 	dsn, err := mysql.ParseDSN(c.dsn)
 	if err != nil {
@@ -60,11 +63,24 @@ func (c *MysqlClient) ApplyMigration(migration *migratego.Migration, down bool) 
 	} else {
 		query = migration.UpScript
 	}
+	re := regexp.MustCompile(`.*\x60\w+\x60\(\)`) //空sql语句 防止报错
+	if query == "" || re.MatchString(query) {
+		fmt.Print("\nmigration " + migration.Name + " is empty,do nothing")
+		return nil
+	}
 	_, err := c.DB.Exec(query)
 	if err != nil {
+		if c.ContinueErr {
+			color.Red("\nmigration " + migration.Name + " error:" + err.Error())
+			return nil
+		}
 		return err
 	}
 	return nil
+}
+
+func (c *MysqlClient) SetContinueErr(flag bool) {
+	c.ContinueErr = flag
 }
 
 func (c *MysqlClient) InsertMigration(migration *migratego.Migration) error {

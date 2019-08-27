@@ -61,6 +61,17 @@ func (t *TableScope) RemoveIndex(name string) migratego.TableScope {
 	t.builder.generators = append(t.builder.generators, &g)
 	return t
 }
+//添加了comment
+func (t *TableScope) Comment(name string) migratego.TableScope {
+	q := rawQuery("COMMENT '" + name + "'")
+	g := AlterTableGenerator{
+		table:     t.name,
+		operation: "",
+		query:     &q,
+	}
+	t.builder.generators = append(t.builder.generators, &g)
+	return t
+}
 func (t *TableScope) Delete() {
 	t.builder.generators = append(t.builder.generators, &dropTablesGenerator{tables: []string{t.name}})
 }

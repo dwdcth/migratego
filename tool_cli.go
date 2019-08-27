@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/thoas/go-funk"
 	"github.com/urfave/cli"
 )
 
@@ -12,6 +13,9 @@ func RunToolCli(m *migrateApplication, args []string) error {
 	tool := cli.NewApp()
 	tool.HelpName = "migratego"
 	client, err := m.getDriverClient()
+	if funk.Contains(args, "e") {
+		client.SetContinueErr(true)
+	}
 	if err != nil {
 		return err
 	}

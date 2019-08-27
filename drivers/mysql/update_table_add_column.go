@@ -104,6 +104,10 @@ func (f *UpdateTableAddColumnGenerator) Sql() string {
 	if f.defaultValue != "" {
 		sql += " COMMENT '" + strings.Replace(f.comment, "'", "\\'", -1) + "'"
 	}
+	//添加注释
+	if f.comment != "" {
+		sql += " COMMENT '" + strings.Replace(f.comment, "'", "\\'", -1) + "'"
+	}
 	if f.after != "" {
 		sql += " AFTER " + wrapName(f.after)
 	}
