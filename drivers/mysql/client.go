@@ -5,15 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"strings"
-
 	"time"
 
-	"github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
-	"github.com/saturn4er/barkup"
 	"github.com/dwdcth/migratego"
 	"github.com/fatih/color"
+	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"regexp"
 )
 
@@ -23,38 +20,40 @@ type MysqlClient struct {
 	dsn         string
 	ContinueErr bool
 }
+
 //这里可能要注释掉 return "", nil
 func (c *MysqlClient) Backup(path string) (string, error) {
 	dsn, err := mysql.ParseDSN(c.dsn)
-	if err != nil {
-		return "", errors.New("error parsing dsn: " + err.Error())
-	}
-	addr := strings.Split(dsn.Addr, ":")
-	var host = "127.0.0.1"
-	var port = "3306"
-	if len(addr) > 0 {
-		host = addr[0]
-	}
-	if len(addr) > 1 {
-		port = addr[1]
-	}
-	db := &barkup.MySQL{
-		Host:     host,
-		Port:     port,
-		DB:       dsn.DBName,
-		User:     dsn.User,
-		Password: dsn.Passwd,
-	}
-
-	export := db.Export()
-	if export.Error != nil {
-		return "", export.Error
-	}
-	cpErr := export.To(path, nil)
-	if cpErr != nil {
-		return export.Filename(), errors.New("can't copy backup to dst path:" + cpErr.Error())
-	}
-	return export.Filename(), nil
+	return dsn.Addr, err // todo 直接备份文件即可
+	//if err != nil {
+	//	return "", errors.New("error parsing dsn: " + err.Error())
+	//}
+	//addr := strings.Split(dsn.Addr, ":")
+	//var host = "127.0.0.1"
+	//var port = "3306"
+	//if len(addr) > 0 {
+	//	host = addr[0]
+	//}
+	//if len(addr) > 1 {
+	//	port = addr[1]
+	//}
+	//db := &barkup.MySQL{
+	//	Host:     host,
+	//	Port:     port,
+	//	DB:       dsn.DBName,
+	//	User:     dsn.User,
+	//	Password: dsn.Passwd,
+	//}
+	//
+	//export := db.Export()
+	//if export.Error != nil {
+	//	return "", export.Error
+	//}
+	//cpErr := export.To(path, nil)
+	//if cpErr != nil {
+	//	return export.Filename(), errors.New("can't copy backup to dst path:" + cpErr.Error())
+	//}
+	//return export.Filename(), nil
 }
 
 func (c *MysqlClient) ApplyMigration(migration *migratego.Migration, down bool) error {

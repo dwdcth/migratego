@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
-	"github.com/thoas/go-funk"
 	"github.com/urfave/cli"
 )
-
 
 //todo dump all  xorm dumpTables
 
@@ -16,7 +15,7 @@ func RunToolCli(m *migrateApplication, args []string) error {
 	tool := cli.NewApp()
 	tool.HelpName = "migratego"
 	client, err := m.getDriverClient()
-	if funk.Contains(args, "e") {
+	if strings.Contains(strings.Join(args, " "), " e ") {
 		client.SetContinueErr(true)
 	}
 	if err != nil {
