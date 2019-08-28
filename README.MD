@@ -1,5 +1,5 @@
 
-forked from [github.com/saturn4er/migratego]() ,origin [README](README_origin.MD)
+forked from [github.com/saturn4er/migratego](github.com/saturn4er/migratego) ,origin [README](README_origin.MD)
 
 ## Examples
 
