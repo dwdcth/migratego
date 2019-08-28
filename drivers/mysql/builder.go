@@ -45,9 +45,11 @@ func (c *MysqlQueryBuilder) NewIndexColumn(column string, params ...interface{})
 		Length: length,
 	}
 }
-func (m *MysqlQueryBuilder) AlterTable(name string, b func(t migratego.AlterTableGenerator)) {
-	scope := &AlterTableGenerator{name: name, builder: m}
-	b(scope)
+func (m *MysqlQueryBuilder) AlterTable(name string, b func(t migratego.AlterTableGenerator)) migratego.AlterTableGenerator {
+
+	c := NewAlterTableGenerator(name, b)
+	m.generators = append(m.generators, c)
+	return c
 }
 func (m *MysqlQueryBuilder) Sqls() []string {
 	var result []string

@@ -37,7 +37,7 @@ func TestMysqlQueryBuilder_CreateTable(t *testing.T) {
 			So(g.Sql(), ShouldEqual, "CREATE TABLE `test_table`(`id` varchar(255) UNSIGNED ZEROFILL BINARY NOT NULL GENERATED ALWAYS AS ('default_value') AUTO_INCREMENT COMMENT 'test_comment', PRIMARY KEY (`id`))")
 			id.AutoIncrement("autoincrement_comment")
 			So(g.Sql(), ShouldEqual, "CREATE TABLE `test_table`(`id` varchar(255) UNSIGNED ZEROFILL BINARY NOT NULL GENERATED ALWAYS AS ('default_value') AUTO_INCREMENT COMMENT 'test_comment', PRIMARY KEY (`id`) COMMENT 'autoincrement_comment')")
-			id.Index("idx_id", true)
+			id.Index("idx_id", true,"btree")
 			So(g.Sql(), ShouldEqual, "CREATE TABLE `test_table`(`id` varchar(255) UNSIGNED ZEROFILL BINARY NOT NULL GENERATED ALWAYS AS ('default_value') AUTO_INCREMENT COMMENT 'test_comment', PRIMARY KEY (`id`) COMMENT 'autoincrement_comment', UNIQUE INDEX `idx_id` (`id` ASC))")
 		})
 		g := b.DropTables("test_table").IfExists()

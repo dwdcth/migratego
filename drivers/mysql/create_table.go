@@ -17,21 +17,25 @@ type createTableGenerator struct {
 	charset       string
 	columns       []migratego.TableColumnGenerator
 	indexes       []migratego.IndexGenerator
-	primaryKey    *PrimaryKeyGenerator
 	uniqueIndexes map[string]string
 }
 
 func (c *createTableGenerator) Sql() string {
 	var sql = "CREATE TABLE `" + c.name + "`("
 
+	primarySql := ""
+
 	w := make([]string, len(c.columns))
 	for i, column := range c.columns {
 		w[i] = column.Sql()
+		if sql := column.GetPrimarySql(); sql != "" {
+			primarySql = sql
+		}
 	}
 	sql += strings.Join(w, ",")
 
-	if c.primaryKey != nil {
-		sql += ", " + c.primaryKey.Sql()
+	if primarySql != "" { // todo  类alter 搞一个builder
+		sql += ", " + primarySql
 	}
 	for _, index := range c.indexes {
 		indexSql := index.Sql()
@@ -66,15 +70,15 @@ func (c *createTableGenerator) Engine(engine string) migratego.CreateTableGenera
 }
 func (c *createTableGenerator) Column(name string, Type string) migratego.TableColumnGenerator {
 	result := &TableColumn{
-		table: c,
+		//table: c,  // todo del
 		name:  name,
 		fType: Type,
 	}
 	c.columns = append(c.columns, result)
 	return result
 }
-func (c *createTableGenerator) Index(name string, unique bool) migratego.IndexGenerator {
-	index := newIndexGenerator(name, unique)
+func (c *createTableGenerator) Index(name string, unique bool, indexType string) migratego.IndexGenerator {
+	index := newIndexGenerator(name, unique, indexType)
 	c.indexes = append(c.indexes, index)
 	return index
 }

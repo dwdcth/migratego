@@ -3,7 +3,7 @@ package migratego
 type QueryBuilder interface {
 	DropTables(...string) DropTablesGenerator
 	CreateTable(string, func(CreateTableGenerator)) CreateTableGenerator
-	AlterTable(string, func(generator AlterTableGenerator))
+	AlterTable(string, func(generator AlterTableGenerator)) AlterTableGenerator
 	NewIndexColumn(column string, params ...interface{}) IndexColumnGenerator
 	RawQuery(string)
 	Sqls() []string
@@ -20,7 +20,7 @@ type DropTablesGenerator interface {
 }
 type CreateTableGenerator interface {
 	Column(name string, Type string) TableColumnGenerator
-	Index(name string, unique bool) IndexGenerator
+	Index(name string, unique bool,indexType string) IndexGenerator
 	Engine(engine string) CreateTableGenerator
 	Charset(charset string) CreateTableGenerator
 	Comment(comment string) CreateTableGenerator
@@ -38,18 +38,20 @@ type TableColumnGenerator interface {
 	Charset(charset string) TableColumnGenerator //todo charset
 	Comment(c string) TableColumnGenerator
 	AutoIncrement(primaryComment ...string) TableColumnGenerator
-	Index(name string, unique bool, params ...interface{}) IndexGenerator
+	Index(name string, unique bool,indexType string, params ...interface{}) IndexGenerator
 	After(column string) TableColumnGenerator                                                 // todo after
 	Rename(oldName string, newName string, charset string, collate string,notNull bool) TableColumnGenerator // todo after
 	Sql() string
+	GetPrimarySql() string
 }
 type AlterTableGenerator interface {
 	Rename(name string) AlterTableGenerator
-	Delete(name string)
+	Delete(name string) AlterTableGenerator
 	AddColumn(name string, Type string) TableColumnGenerator
-	RemoveColumn(name string)
-	AddIndex(name string, unique bool) IndexGenerator
-	RemoveIndex(name string)
+	RemoveColumn(name string) AlterTableGenerator
+	AddIndex(name string, unique bool,indexType string,columns ... IndexColumnGenerator) IndexGenerator
+	RemoveIndex(name string) AlterTableGenerator
+	RemovePrimary(name string) AlterTableGenerator
 	Charset(charset string) AlterTableGenerator // todo charset
 	Comment(c string) AlterTableGenerator
 	ModifyColumn(name string, Type string, notNull bool) TableColumnGenerator

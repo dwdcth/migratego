@@ -12,14 +12,19 @@ func TestMysqlQueryBuilder_AlterTable(t *testing.T) {
 	Convey("QueryBuilder.AlterTable Should generate right sql", t, func() {
 		b := MysqlQueryBuilder{}
 		b.AlterTable("test_table", func(g migratego.AlterTableGenerator) {
-			id := g.AddColumn("id","int")
+			id := g.AddColumn("id","int").AutoIncrement("ccc")
 			So(id.GetName(), ShouldEqual, "id")
-			t.Log(g.Sql())
-			modify := g.ModifyColumn("id","varchar(10)",true).AutoIncrement()
-			t.Log(modify.Sql())
 
-			rename := g.RenameColumn("id","name","utf8mb4","utf8mb4_unicode_ci",true)
-			t.Log(rename.Sql())
+			g.ModifyColumn("id","varchar(10)",true)
+			t.Log(g.Sql())
+
+			 g.RenameColumn("id","name","utf8mb4","utf8mb4_unicode_ci",true).Comment("aa")
+			t.Log(g.Sql())
+			g.RemoveIndex("aa")
+			t.Log(g.Sql())
+			g.RemoveColumn("ccc")
+			t.Log(g.Sql())
+
 			//So(g.Sql(), ShouldEqual, "CREATE TABLE `test_table`(`id` varchar(255) NULL)")
 			//id.Binary()
 			//So(g.Sql(), ShouldEqual, "CREATE TABLE `test_table`(`id` varchar(255) BINARY NULL)")

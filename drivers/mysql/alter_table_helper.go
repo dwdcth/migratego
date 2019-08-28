@@ -12,8 +12,10 @@ func (s *RenameTableGenerator) Sql() string {
 }
 
 const (
-	AlterTableAdd  = "ADD"
-	AlterTableDrop = "DROP"
+	AlterTableAdd    = "ADD"
+	AlterTableDrop   = "DROP"
+	AlterTableModify = "MODIFY COLUMN"
+	AlterTableChange = "CHANGE"
 )
 
 type AlterTableGenHelper struct {
@@ -29,5 +31,9 @@ func (a *AlterTableGenHelper) Sql() string {
 	sql := "ALTER TABLE " + wrapName(a.table)
 	sql += " " + a.operation
 	sql += " " + a.query.Sql()
+
+	if colGen, ok := a.query.(migratego.TableColumnGenerator); ok && colGen.GetPrimarySql() != "" {
+		sql += ", ADD " + colGen.GetPrimarySql()
+	}
 	return sql
 }

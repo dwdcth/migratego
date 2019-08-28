@@ -5,11 +5,13 @@ import (
 	"strings"
 )
 
+//https://blog.csdn.net/qq_36744627/article/details/81253482
+
 type AlterTableGenerator struct {
-	name    string
-	columns []migratego.TableColumnGenerator
-	indexes []migratego.IndexGenerator
-	builder *MysqlQueryBuilder
+	name       string
+	indexes    []migratego.IndexGenerator
+	builder    *MysqlQueryBuilder
+	primaryKey *PrimaryKeyGenerator
 }
 
 func (t *AlterTableGenerator) AddColumn(name string, Type string) migratego.TableColumnGenerator {
@@ -17,14 +19,20 @@ func (t *AlterTableGenerator) AddColumn(name string, Type string) migratego.Tabl
 		panic("Can't add column to table with empty name")
 	}
 	cg := &TableColumn{
-		tableScope: t,
-		name:       name,
-		fType:      Type,
+		isAlter: true,
+		name:    name,
+		fType:   Type,
 	}
-	t.columns = append(t.columns, cg)
+	g := AlterTableGenHelper{
+		table:     t.name,
+		operation: AlterTableAdd,
+		query:     cg,
+	}
+
+	t.builder.generators = append(t.builder.generators, &g)
 	return cg
 }
-func (t *AlterTableGenerator) RemoveColumn(name string) {
+func (t *AlterTableGenerator) RemoveColumn(name string) migratego.AlterTableGenerator {
 	q := rawQuery("COLUMN " + wrapName(name))
 	g := AlterTableGenHelper{
 		table:     t.name,
@@ -32,6 +40,7 @@ func (t *AlterTableGenerator) RemoveColumn(name string) {
 		query:     &q,
 	}
 	t.builder.generators = append(t.builder.generators, &g)
+	return t
 }
 
 func (t *AlterTableGenerator) Rename(newName string) migratego.AlterTableGenerator {
@@ -42,9 +51,9 @@ func (t *AlterTableGenerator) Rename(newName string) migratego.AlterTableGenerat
 	t.name = newName
 	return t
 }
-func (t *AlterTableGenerator) AddIndex(name string, unique bool) migratego.IndexGenerator {
-	index := newIndexGenerator(name, unique)
-
+func (t *AlterTableGenerator) AddIndex(name string, unique bool, indexType string, columns ...migratego.IndexColumnGenerator) migratego.IndexGenerator {
+	index := newIndexGenerator(name, unique, indexType)
+	index.Columns(columns...) // todo 类型判断
 	g := AlterTableGenHelper{
 		table:     t.name,
 		operation: AlterTableAdd,
@@ -53,14 +62,25 @@ func (t *AlterTableGenerator) AddIndex(name string, unique bool) migratego.Index
 	t.builder.generators = append(t.builder.generators, &g)
 	return index
 }
-func (t *AlterTableGenerator) RemoveIndex(name string) {
+func (t *AlterTableGenerator) RemoveIndex(name string) migratego.AlterTableGenerator {
 	q := rawQuery("INDEX " + wrapName(name))
 	g := AlterTableGenHelper{
 		table:     t.name,
-		operation: AlterTableAdd,
+		operation: AlterTableDrop,
 		query:     &q,
 	}
 	t.builder.generators = append(t.builder.generators, &g)
+	return t
+}
+func (t *AlterTableGenerator) RemovePrimary(name string) migratego.AlterTableGenerator {
+	q := rawQuery("PRIMARY " + wrapName(name))
+	g := AlterTableGenHelper{
+		table:     t.name,
+		operation: AlterTableDrop,
+		query:     &q,
+	}
+	t.builder.generators = append(t.builder.generators, &g)
+	return t
 }
 
 //添加了comment
@@ -86,26 +106,39 @@ func (t *AlterTableGenerator) Charset(name string) migratego.AlterTableGenerator
 	return t
 }
 
-func (t *AlterTableGenerator) Delete(name string) {
+func (t *AlterTableGenerator) Delete(name string) migratego.AlterTableGenerator {
 	t.builder.generators = append(t.builder.generators, &dropTablesGenerator{tables: []string{t.name}})
+	return t
 }
 
 func (t *AlterTableGenerator) ModifyColumn(name string, Type string, notNull bool) migratego.TableColumnGenerator {
 	cg := &TableColumn{
-		tableScope: t,
-		name:       name,
-		fType:      Type,
-		notNull:    notNull,
-		isModify:   true,
+		isAlter:  true,
+		name:     name,
+		fType:    Type,
+		notNull:  notNull,
+		isModify: true,
 	}
-	t.columns = append(t.columns, cg)
+	g := AlterTableGenHelper{
+		table:     t.name,
+		operation: AlterTableModify,
+		query:     cg,
+	}
+
+	t.builder.generators = append(t.builder.generators, &g)
 	return cg
 }
 
 func (t *AlterTableGenerator) RenameColumn(oldName string, newName string, charset string, collate string, notNull bool) migratego.TableColumnGenerator {
 	cg := &TableColumn{isRename: true}
 	cg.Rename(oldName, newName, charset, collate, notNull)
-	t.columns = append(t.columns, cg)
+
+	g := AlterTableGenHelper{
+		table:     t.name,
+		operation: AlterTableChange,
+		query:     cg,
+	}
+	t.builder.generators = append(t.builder.generators, &g)
 	return cg
 }
 
@@ -114,12 +147,17 @@ func (t *AlterTableGenerator) DeleteIfExists() {
 }
 
 func (t *AlterTableGenerator) Sql() string {
-	sql := "ALTER TABLE " + wrapName(t.name)
-	sql += " " + strings.Join(t.builder.Sqls(), " ")
 
-	//w := make([]string, len(c.columns))
-	//for i, column := range c.columns {
-	//	w[i] = column.Sql()
-	//}
+	sql := strings.Join(t.builder.Sqls(), "; ")
+
 	return sql
+}
+
+func NewAlterTableGenerator(name string, sc func(generator migratego.AlterTableGenerator)) migratego.AlterTableGenerator {
+	result := &AlterTableGenerator{
+		name:    name,
+		builder: &MysqlQueryBuilder{},
+	}
+	sc(result)
+	return result
 }

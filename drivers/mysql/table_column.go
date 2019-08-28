@@ -17,8 +17,10 @@ func (c CreateTableColumns) String() string {
 }
 
 type TableColumn struct {
-	table      *createTableGenerator
-	tableScope *AlterTableGenerator
+	isAlter bool
+
+	primaryKey *PrimaryKeyGenerator
+	indexes    []migratego.IndexGenerator
 
 	name     string
 	oldName  string
@@ -56,11 +58,11 @@ func (f *TableColumn) AutoIncrement(primaryComment ...string) migratego.TableCol
 // Index add index to table for this column
 // Usage: Index("index_name", true, "DESC", 10)
 // This will create unique index "index_name" and it will add this column to it
-func (f *TableColumn) Index(name string, unique bool, params ...interface{}) migratego.IndexGenerator {
+func (f *TableColumn) Index(name string, unique bool, indexType string, params ...interface{}) migratego.IndexGenerator {
 	if name == "" {
 		name = "idx_" + f.name
 	}
-	index := newIndexGenerator(name, unique)
+	index := newIndexGenerator(name, unique, indexType)
 	var order = "ASC"
 	var length = 0
 	if len(params) > 0 {
@@ -86,18 +88,27 @@ func (f *TableColumn) Index(name string, unique bool, params ...interface{}) mig
 		Order:  order,
 		Length: length,
 	})
-	f.table.indexes = append(f.table.indexes, index)
+	f.indexes = append(f.indexes, index)
 	return index
 }
 func (f *TableColumn) Primary(comment ...string) migratego.TableColumnGenerator {
 	var c string
 	if len(comment) > 0 {
 		c = comment[0]
-	}else {
+	} else {
 		return f
 	}
-	f.table.primaryKey = NewPrimaryKeyGenerator([]string{f.name}, c)
+	f.primaryKey = NewPrimaryKeyGenerator([]string{f.name}, c)
+
 	return f
+}
+func (f *TableColumn) GetPrimarySql() string {
+
+	if f.primaryKey != nil {
+		return f.primaryKey.Sql()
+	}
+
+	return ""
 }
 
 // NotNull marks column as NOT NULL
@@ -152,8 +163,12 @@ func (f *TableColumn) Rename(oldName string, newName string, charset string, col
 }
 
 func (f *TableColumn) Sql() string {
+
 	sql := "`" + f.name + "` " + string(f.fType)
-	//sql := "ALTER TABLE " + wrapName(f.tableScope.name) + " ADD COLUMN " + wrapName(f.name) + " " + string(f.fType)
+
+	if f.oldName != "" {
+		sql = "`" + f.oldName + "` " + "`" + f.name + "` " + string(f.fType)
+	}
 
 	if f.unsigned {
 		sql += " UNSIGNED"

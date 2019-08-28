@@ -8,7 +8,7 @@ import (
 
 func TestIndexGenerator(t *testing.T) {
 	Convey("Should create index generator", t, func() {
-		idx := newIndexGenerator("idx_id", true).(*IndexGenerator)
+		idx := newIndexGenerator("idx_id", true,"btree").(*IndexGenerator)
 		So(idx.name, ShouldEqual, "idx_id")
 		So(idx.unique, ShouldEqual, true)
 		idx.Name("idx_id1")
