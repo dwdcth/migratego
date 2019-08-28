@@ -1,31 +1,5 @@
-[![Build Status](https://travis-ci.org/saturn4er/migratego.svg?branch=master)](https://travis-ci.org/saturn4er/migratego)
-[![Coverage Status](https://coveralls.io/repos/github/saturn4er/migratego/badge.svg?branch=master)](https://coveralls.io/github/saturn4er/migratego?branch=master)
-# MIGRATEGO
 
-Library to write and build migrations using Golang.
-
-## Dependencies
-- Go 1.7+
-- mysqldump ( to dump mysql database before applying migrations
-
-## Installation
-
-**Library**
-
-    go get github.com/saturn4er/migratego
-
-**Cli tool**
-
-    go get github.com/saturn4er/migratego/cmd/migratego
-
-## Usage
-
-* Init your migration application with `migratego init`
-* Create your first migration with `migratego g initial_migration`
-* Open `./migrations/001_initial_migration.go` file and write your first migration
-* Build it with `go build -o migrations ./migrations/*.go`
-* Apply your first `initial_migration` to database with `./migrations m`
-
+forked from [github.com/saturn4er/migratego]() ,origin [README](README_origin.MD)
 
 ## Examples
 
@@ -77,7 +51,7 @@ func initAppDown(s migratego.QueryBuilder) {
    * Add column
    * Add index
    * Remove index
-   * Update column (TODO)
+   * Update column
  * Raw Query
  
 
@@ -85,3 +59,4 @@ func initAppDown(s migratego.QueryBuilder) {
 - Add Postgres
 - Foreign Key
 - Tool to Create initial migration by existing tables
+- Backup
